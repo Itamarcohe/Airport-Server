@@ -1,0 +1,40 @@
+[
+  {
+    "ContainingType": "AirportServer.Controllers.FlightsController",
+    "Method": "AddFlight",
+    "RelativePath": "api/Flights/AddFlight",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "flight",
+        "Type": "AirportServer.Models.Flight",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "AirportServer.Controllers.FlightsController",
+    "Method": "SeedData",
+    "RelativePath": "api/Flights/SeedData",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Void",
+        "MediaTypes": [],
+        "StatusCode": 200
+      }
+    ]
+  }
+]
