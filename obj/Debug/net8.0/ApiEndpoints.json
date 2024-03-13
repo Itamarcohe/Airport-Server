@@ -20,21 +20,5 @@
         "StatusCode": 200
       }
     ]
-  },
-  {
-    "ContainingType": "AirportServer.Controllers.FlightsController",
-    "Method": "SeedData",
-    "RelativePath": "api/Flights/SeedData",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": [
-      {
-        "Type": "System.Void",
-        "MediaTypes": [],
-        "StatusCode": 200
-      }
-    ]
   }
 ]

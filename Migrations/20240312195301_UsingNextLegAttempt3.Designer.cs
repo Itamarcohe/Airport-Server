@@ -4,6 +4,7 @@ using AirportServer.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AirportServer.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240312195301_UsingNextLegAttempt3")]
+    partial class UsingNextLegAttempt3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -58,13 +61,15 @@ namespace AirportServer.Migrations
                     b.Property<int>("CrossingTime")
                         .HasColumnType("int");
 
-                    b.Property<string>("NextLegs")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int?>("LegId")
+                        .HasColumnType("int");
 
                     b.Property<int>("Number")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LegId");
 
                     b.ToTable("Legs");
                 });
@@ -101,6 +106,24 @@ namespace AirportServer.Migrations
                     b.ToTable("Logs");
                 });
 
+            modelBuilder.Entity("AirportServer.Models.NextLeg", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("LegId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LegId");
+
+                    b.ToTable("NextLeg");
+                });
+
             modelBuilder.Entity("AirportServer.Models.Flight", b =>
                 {
                     b.HasOne("AirportServer.Models.Leg", "Leg")
@@ -110,6 +133,13 @@ namespace AirportServer.Migrations
                         .IsRequired();
 
                     b.Navigation("Leg");
+                });
+
+            modelBuilder.Entity("AirportServer.Models.Leg", b =>
+                {
+                    b.HasOne("AirportServer.Models.Leg", null)
+                        .WithMany("NextLegs")
+                        .HasForeignKey("LegId");
                 });
 
             modelBuilder.Entity("AirportServer.Models.Log", b =>
@@ -129,6 +159,22 @@ namespace AirportServer.Migrations
                     b.Navigation("Flight");
 
                     b.Navigation("Leg");
+                });
+
+            modelBuilder.Entity("AirportServer.Models.NextLeg", b =>
+                {
+                    b.HasOne("AirportServer.Models.Leg", "Leg")
+                        .WithMany()
+                        .HasForeignKey("LegId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Leg");
+                });
+
+            modelBuilder.Entity("AirportServer.Models.Leg", b =>
+                {
+                    b.Navigation("NextLegs");
                 });
 #pragma warning restore 612, 618
         }

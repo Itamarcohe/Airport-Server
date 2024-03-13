@@ -17,14 +17,21 @@ namespace AirportServer.Controllers
         {
             this.data = data;
             this.service = service;
-            data.Database.Migrate();
+            //data.Database.Migrate();
+
+            //Delete the existing database if it exists
+            //data.Database.EnsureDeleted();
+
+            // Create a new database
+            //data.Database.EnsureCreated();
+
         }
 
-        [HttpGet]
-        public void SeedData()
-        {
-            data.SeedData();
-        }
+        //[HttpGet]
+        //public void SeedData()
+        //{
+        //    data.SeedData();
+        //}
 
 
         [HttpPost]

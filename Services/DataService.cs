@@ -19,12 +19,12 @@ namespace AirportServer.Services
         {
             if (!IsAirportFull() && !IsLegOccupated(1))
             {
-                PrintToConsole(flight);
                 flight.Leg = GetLeg(1);
                 AddFlight(flight);
                 AddLog(flight);
                 await data.SaveChangesAsync();
                 flight.CallbackCalled += GoNextTerminal;
+                PrintToConsole(flight);
             }
         }
 
@@ -47,7 +47,7 @@ namespace AirportServer.Services
                     else if (flight.Status == StatusType.Departure)
                     {
                         flight.Status = StatusType.DoneDepartured;
-                        flight.Leg = GetLeg(9);
+                        MoveLeg(flight, 9);
                         await SaveAsync();
                         Console.WriteLine("Finished reached 9 watch the logs~!");
                         break;
@@ -96,12 +96,17 @@ namespace AirportServer.Services
             }
         }
 
+        private async Task WaitAsync(int millisecondsToWait)
+        {
+            await Task.Delay(millisecondsToWait);
+        }
+
+
         private void MoveLeg(Flight flight, int nextLegNumber)
         {
             AddOutTimeToLog(flight);
             flight.Leg = GetLeg(nextLegNumber);
             AddLog(flight);
-            PrintToConsole(flight);
             PrintToConsole(flight);
         }
         private void AddOutTimeToLog(Flight flight)
@@ -116,7 +121,6 @@ namespace AirportServer.Services
         }
         private static void PrintToConsole(Flight flight) => Console.WriteLine($"\n\n\n--Flight Code: {flight.Code}--" +
             $"\n --Current Leg = {flight.Leg!.Number}\n --Gonna wait = {flight.Leg.CrossingTime * 5 / 1000} SEC \n CurrentTime {DateTime.Now}\n\n\n");
-        private async Task WaitAsync(int millisecondsToWait) => await WaitAsync(millisecondsToWait);
         private void AddLog(Flight flight) => data.Logs.Add(new Log { Flight = flight, Leg = flight.Leg, In = DateTime.Now });
         private void AddFlight(Flight flight) => data.Flights.Add(flight);
         private bool IsAirportFull() => data.Flights.Count(f => f.Leg != null && f.Leg.Number >= 1 && f.Leg.Number <= 8) >= 4;

@@ -134,3 +134,4 @@ C:\Users\Itamar\Desktop\FlightsProject\AirportServer\bin\Debug\net8.0\runtimes\w
 C:\Users\Itamar\Desktop\FlightsProject\AirportServer\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Runtime.Caching.dll
 C:\Users\Itamar\Desktop\FlightsProject\AirportServer\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Security.Cryptography.ProtectedData.dll
 C:\Users\Itamar\Desktop\FlightsProject\AirportServer\bin\Debug\net8.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
+C:\Users\Itamar\Desktop\FlightsProject\AirportServer\obj\Debug\net8.0\AirportServer.sourcelink.json
