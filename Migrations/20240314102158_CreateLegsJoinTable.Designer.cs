@@ -4,6 +4,7 @@ using AirportServer.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AirportServer.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240314102158_CreateLegsJoinTable")]
+    partial class CreateLegsJoinTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -66,29 +69,6 @@ namespace AirportServer.Migrations
                     b.ToTable("Legs");
                 });
 
-            modelBuilder.Entity("AirportServer.Models.LegsJoinTable", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("FromLegId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("ToLegId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FromLegId");
-
-                    b.HasIndex("ToLegId");
-
-                    b.ToTable("LegsJoinTable");
-                });
-
             modelBuilder.Entity("AirportServer.Models.Log", b =>
                 {
                     b.Property<int>("Id")
@@ -130,21 +110,6 @@ namespace AirportServer.Migrations
                         .IsRequired();
 
                     b.Navigation("Leg");
-                });
-
-            modelBuilder.Entity("AirportServer.Models.LegsJoinTable", b =>
-                {
-                    b.HasOne("AirportServer.Models.Leg", "FromLeg")
-                        .WithMany()
-                        .HasForeignKey("FromLegId");
-
-                    b.HasOne("AirportServer.Models.Leg", "ToLeg")
-                        .WithMany()
-                        .HasForeignKey("ToLegId");
-
-                    b.Navigation("FromLeg");
-
-                    b.Navigation("ToLeg");
                 });
 
             modelBuilder.Entity("AirportServer.Models.Log", b =>

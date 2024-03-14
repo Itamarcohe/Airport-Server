@@ -9,103 +9,115 @@ namespace AirportServer.Services
     {
         private readonly DataContext data;
         private List<Leg> LegsList { get; set; }
+        private List<LegsJoinTable> LegsJoinList { get; set; }
 
         public DataService(IServiceScopeFactory scopeService)
         {
             data = scopeService.CreateScope().ServiceProvider.GetRequiredService<DataContext>();
+
             LegsList = data.Legs.ToList();
+
+            LegsJoinList = data.LegsJoinTable
+                .Include(ljt => ljt.FromLeg)
+                .Include(ljt => ljt.ToLeg)
+                .ToList();
         }
+
         public async void AddNewFlight(Flight flight)
         {
-            if (!IsAirportFull() && !IsLegOccupated(1))
+            Leg leg1 = LegsList.Find(l => l.Number == 1)!;
+
+            if (!IsAirportFull() && !IsLegOccupated(leg1))
             {
-                flight.Leg = GetLeg(1);
+                flight.Leg = leg1;
                 AddFlight(flight);
                 AddLog(flight);
                 await data.SaveChangesAsync();
-                flight.CallbackCalled += GoNextTerminal;
+                flight.CallbackCalled += NextLeg;
                 PrintToConsole(flight);
-            }
+            } 
         }
 
-        private async void GoNextTerminal(Flight flight)
+        private async void NextLeg(Flight flight)
         {
-            flight.CallbackCalled -= GoNextTerminal;
+            flight.CallbackCalled -= NextLeg;
             flight.LegTimer.Change(Timeout.Infinite, Timeout.Infinite);
-            bool isNext = false;
-            int modifiedNextLegNumber = -1;
-
-            foreach (int nextLegNumber in flight.Leg.NextLegs!)
+            List<LegsJoinTable> LegConnections = LegsJoinList.Where(ljt => ljt.FromLeg == flight.Leg).ToList();
+            if (flight.Leg.Number == 4)
             {
-                if (flight.Leg.Number == 4)
+                await ProccessLeg4(flight, LegConnections);
+            }
+            else
+            {
+                for (int i = 0; i < LegConnections.Count; i++)
                 {
-                    if (flight.Status == StatusType.Arrival)
+                    Leg nextLeg = LegConnections[i].ToLeg!;
+                    if (!IsLegOccupated(nextLeg))
                     {
-                        modifiedNextLegNumber = 5;
-                    }
-
-                    else if (flight.Status == StatusType.Departure)
-                    {
-                        flight.Status = StatusType.DoneDepartured;
-                        MoveLeg(flight, 9);
+                        ChangeStatusToDeparture(flight);
+                        MoveLeg(flight, nextLeg);
                         await SaveAsync();
-                        Console.WriteLine("Finished reached 9 watch the logs~!");
+                        flight.CallbackCalled += NextLeg;
                         break;
-                    }
-
-                    if (!IsLegOccupated(modifiedNextLegNumber))
-                    {
-                        MoveLeg(flight, modifiedNextLegNumber);
-                        isNext = true;
-                        await SaveAsync();
                     }
                     else
                     {
-                        GoNextTerminal(flight);
-                    }
-                    flight.CallbackCalled += GoNextTerminal;
-                    break;
-                }
-
-                else
-                {
-                    if (flight.Leg.Number == 5)
-                    {
-                        flight.Status = StatusType.Departure;
-                    }
-
-                    if (!IsLegOccupated(nextLegNumber))
-                    {
-                        MoveLeg(flight, nextLegNumber);
-                        isNext = true;
-                        await SaveAsync();
-                        flight.CallbackCalled += GoNextTerminal;
-                        break;
-                    }
-                }
-                if (!isNext)
-                {
-                    PrintToConsole(flight);
-                    Console.WriteLine($"\n\n ---- Waiting another 20 SEC NOW ---- \n\n");
-                    await WaitAsync(20000);
-                    if (flight.Leg.NextLegs.Count == 1)
-                    {
-                        GoNextTerminal(flight);
+                        await NextLegOptionOrWait(flight, LegConnections, i);
                     }
                 }
             }
         }
-
-        private async Task WaitAsync(int millisecondsToWait)
+        private async Task ProccessLeg4(Flight flight, List<LegsJoinTable> nextLegs)
         {
-            await Task.Delay(millisecondsToWait);
+            if (flight.Status == StatusType.Arrival)
+            {
+                Leg nextLeg5 = nextLegs.Find(nl => nl.ToLeg!.Number == 5)!.ToLeg!;
+                if (!IsLegOccupated(nextLeg5))
+                {
+                    MoveLeg(flight, nextLeg5);
+                    await SaveAsync();
+                    flight.CallbackCalled += NextLeg;
+                }
+                else
+                {
+                    await WaitAsync(5);
+                    flight.CallbackCalled += NextLeg;
+                }
+            }
+            else if (flight.Status == StatusType.Departure)
+            {
+                Leg nextLeg9 = nextLegs.Find(nl => nl.ToLeg!.Number == 9)!.ToLeg!;
+                flight.Status = StatusType.DoneDepartured;
+                MoveLeg(flight, nextLeg9);
+                await SaveAsync();
+                Console.WriteLine("Finished reached 9 watch the logs~!");
+            }
         }
 
+        private async Task NextLegOptionOrWait(Flight flight, List<LegsJoinTable> nextLegs, int i)
+        {
+            if (nextLegs.Count == 1 || i == 1)
+            {
+                await WaitAsync(5);
+                NextLeg(flight);
+            }
+        }
 
-        private void MoveLeg(Flight flight, int nextLegNumber)
+        private static void ChangeStatusToDeparture(Flight flight)
+        {
+            if (flight.Leg.Number == 5)
+            {
+                flight.Status = StatusType.Departure;
+            }
+        }
+        private async Task WaitAsync(int secondToWait)
+        {
+            await Task.Delay(secondToWait * 1000);
+        }
+        private void MoveLeg(Flight flight, Leg leg)
         {
             AddOutTimeToLog(flight);
-            flight.Leg = GetLeg(nextLegNumber);
+            flight.Leg = leg;
             AddLog(flight);
             PrintToConsole(flight);
         }
@@ -120,12 +132,12 @@ namespace AirportServer.Services
             latestLog!.Out = DateTime.Now;
         }
         private static void PrintToConsole(Flight flight) => Console.WriteLine($"\n\n\n--Flight Code: {flight.Code}--" +
-            $"\n --Current Leg = {flight.Leg!.Number}\n --Gonna wait = {flight.Leg.CrossingTime * 5 / 1000} SEC \n CurrentTime {DateTime.Now}\n\n\n");
+            $"\n --Current Leg = {flight.Leg!.Number}\n --Gonna wait = {flight.Leg.CrossingTime * 3 / 1000} SEC \n CurrentTime {DateTime.Now}\n\n\n");
         private void AddLog(Flight flight) => data.Logs.Add(new Log { Flight = flight, Leg = flight.Leg, In = DateTime.Now });
         private void AddFlight(Flight flight) => data.Flights.Add(flight);
         private bool IsAirportFull() => data.Flights.Count(f => f.Leg != null && f.Leg.Number >= 1 && f.Leg.Number <= 8) >= 4;
-        private bool IsLegOccupated(int number) => data.Flights.Any(f => f.Leg != null && f.Leg.Number == number);
-        private Leg GetLeg(int number) => LegsList.Find(l => l.Number == number)!;
+        private bool IsLegOccupated(Leg leg) => data.Flights.Any(f => f.Leg != null && f.Leg == leg);
+        private Leg GetLeg(Leg leg) => LegsList.Find(l => l == leg)!;
         private async Task SaveAsync() => await data.SaveChangesAsync();
     }
 }

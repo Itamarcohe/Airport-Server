@@ -20,8 +20,8 @@
 
                 if (leg != null)
                 {
-                    LegTimer.Change(0, leg.CrossingTime * 5);
-                    StatusChanged?.Invoke(this);            
+                    LegTimer.Change(0, leg.CrossingTime * 3);
+                    StatusChanged?.Invoke(this);
                 }
             }
         }

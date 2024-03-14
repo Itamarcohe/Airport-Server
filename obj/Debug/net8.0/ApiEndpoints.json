@@ -20,5 +20,15 @@
         "StatusCode": 200
       }
     ]
+  },
+  {
+    "ContainingType": "AirportServer.Controllers.FlightsController",
+    "Method": "TestLegs",
+    "RelativePath": "api/Flights/TestLegs",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
   }
 ]

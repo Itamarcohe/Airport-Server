@@ -12,6 +12,7 @@ namespace AirportServer.Data
         }
 
         public virtual DbSet<Leg> Legs { get; set; }
+        public virtual DbSet<LegsJoinTable> LegsJoinTable { get; set; }
         public virtual DbSet<Flight> Flights { get; set; }
         public virtual DbSet<Log> Logs { get; set; }
 
@@ -20,17 +21,43 @@ namespace AirportServer.Data
         {
             try
             {
-                var l1 = new Leg { Number = 1, CrossingTime = 1000, NextLegs = new List<int> { 2 } };
-                var l2 = new Leg { Number = 2, CrossingTime = 2000, NextLegs = new List<int> { 3 } };
-                var l3 = new Leg { Number = 3, CrossingTime = 3000, NextLegs = new List<int> { 4 } };
-                var l4 = new Leg { Number = 4, CrossingTime = 5000, NextLegs = new List<int> { 5, 9 } };
-                var l5 = new Leg { Number = 5, CrossingTime = 1000, NextLegs = new List<int> { 6, 7 } };
-                var l6 = new Leg { Number = 6, CrossingTime = 2000, NextLegs = new List<int> { 8 } };
-                var l7 = new Leg { Number = 7, CrossingTime = 3000, NextLegs = new List<int> { 8 } };
-                var l8 = new Leg { Number = 8, CrossingTime = 5000, NextLegs = new List<int> { 4 } };
-                var l9 = new Leg { Number = 9, CrossingTime = 5000 };
-    
-                Legs.AddRange(new List<Leg> { l1, l2, l3, l4, l5, l6, l7, l8, l9 });
+                var leg1 = new Leg { Number = 1, CrossingTime = 3000 };
+                var leg2 = new Leg { Number = 2, CrossingTime = 2000 };
+                var leg3 = new Leg { Number = 3, CrossingTime = 3000 };
+                var leg4 = new Leg { Number = 4, CrossingTime = 2000 };
+                var leg5 = new Leg { Number = 5, CrossingTime = 2500 };
+                var leg6 = new Leg { Number = 6, CrossingTime = 1500 };
+                var leg7 = new Leg { Number = 7, CrossingTime = 1000 };
+                var leg8 = new Leg { Number = 8, CrossingTime = 2000 };
+                var leg9 = new Leg { Number = 9, CrossingTime = 3000 };
+
+                var FromLeg1 = new LegsJoinTable { ToLeg = leg2, FromLeg = leg1};
+                var FromLeg2 = new LegsJoinTable { ToLeg = leg3, FromLeg = leg2 };
+                var FromLeg3 = new LegsJoinTable { ToLeg = leg4 , FromLeg = leg3 };
+
+                // Leg4 options
+                var FromLeg4 = new LegsJoinTable { ToLeg = leg5 , FromLeg = leg4 };
+
+                var FromLeg4To9 = new LegsJoinTable { ToLeg = leg9 , FromLeg = leg4 };
+
+                // Leg5
+                var FromLeg5To6 = new LegsJoinTable { ToLeg = leg6, FromLeg = leg5 };
+                var FromLeg5To7 = new LegsJoinTable { ToLeg = leg7, FromLeg = leg5 };
+
+                // leg 6
+                var FromLeg6To8 = new LegsJoinTable { ToLeg = leg8, FromLeg = leg6 };
+
+                // leg 7
+                var FromLeg7To8 = new LegsJoinTable { ToLeg = leg8, FromLeg = leg7 };
+
+                // leg8
+
+                var FromLeg8To4 = new LegsJoinTable { ToLeg = leg4, FromLeg = leg8 };
+
+
+                LegsJoinTable.AddRange(new List<LegsJoinTable> { FromLeg1 , FromLeg2, FromLeg3, FromLeg4, FromLeg4To9,
+                FromLeg5To6, FromLeg5To7, FromLeg6To8, FromLeg7To8, FromLeg8To4});
+                Legs.AddRange(new List<Leg> { leg1, leg2, leg3, leg4, leg5, leg6, leg7, leg8, leg9 });
 
 
                 SaveChanges();

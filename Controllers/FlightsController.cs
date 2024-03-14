@@ -17,12 +17,11 @@ namespace AirportServer.Controllers
         {
             this.data = data;
             this.service = service;
-            //data.Database.Migrate();
 
             //Delete the existing database if it exists
             //data.Database.EnsureDeleted();
 
-            // Create a new database
+            //Create a new database
             //data.Database.EnsureCreated();
 
         }
@@ -32,7 +31,17 @@ namespace AirportServer.Controllers
         //{
         //    data.SeedData();
         //}
+        [HttpGet]
+        public IActionResult TestLegs()
+        {
+            var nextLegsForLegNumber4 = data.LegsJoinTable
+                .Include(jointable => jointable.FromLeg)
+                .Include(jointable => jointable.ToLeg)
+                .Where(jointable => jointable.FromLeg.Id == 4)
+                .ToList();
 
+            return Ok(nextLegsForLegNumber4);
+        }
 
         [HttpPost]
         public void AddFlight(Flight flight)
