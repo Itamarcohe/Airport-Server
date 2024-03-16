@@ -16,7 +16,6 @@ namespace AirportServer.Data
         public virtual DbSet<Flight> Flights { get; set; }
         public virtual DbSet<Log> Logs { get; set; }
 
-
         public void SeedData()
         {
             try
@@ -29,7 +28,7 @@ namespace AirportServer.Data
                 var leg6 = new Leg { Number = 6, CrossingTime = 1500 };
                 var leg7 = new Leg { Number = 7, CrossingTime = 1000 };
                 var leg8 = new Leg { Number = 8, CrossingTime = 2000 };
-                var leg9 = new Leg { Number = 9, CrossingTime = 3000 };
+                var leg9 = new Leg { Number = 9 };
 
                 var FromLeg1 = new LegsJoinTable { ToLeg = leg2, FromLeg = leg1};
                 var FromLeg2 = new LegsJoinTable { ToLeg = leg3, FromLeg = leg2 };

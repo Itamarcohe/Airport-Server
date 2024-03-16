@@ -31,17 +31,6 @@ namespace AirportServer.Controllers
         //{
         //    data.SeedData();
         //}
-        [HttpGet]
-        public IActionResult TestLegs()
-        {
-            var nextLegsForLegNumber4 = data.LegsJoinTable
-                .Include(jointable => jointable.FromLeg)
-                .Include(jointable => jointable.ToLeg)
-                .Where(jointable => jointable.FromLeg.Id == 4)
-                .ToList();
-
-            return Ok(nextLegsForLegNumber4);
-        }
 
         [HttpPost]
         public void AddFlight(Flight flight)
@@ -49,10 +38,5 @@ namespace AirportServer.Controllers
             service.AddNewFlight(flight);
         }
 
-        private void AddLog(Flight flight)
-        {
-            data.Logs.Add(new Log { Flight = flight, Status = flight.Status, Leg = flight.Leg, In = DateTime.Now });
-            data.SaveChanges();
-        }
     }
 }
