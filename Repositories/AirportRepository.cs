@@ -41,7 +41,13 @@ namespace AirportServer.Repositories
                 .ToListAsync();
         }
 
-        public async Task UpdateOutLogTime(int flightId)
+        public async Task<List<Log>> GetLogs()
+        {
+            return await _data.Logs.Include(l => l.Flight).ToListAsync();
+        }
+
+
+        public async Task<Log> UpdateOutLogTime(int flightId)
         {
             var latestLog = await _data.Logs
             .Include(l => l.Flight)
@@ -54,7 +60,10 @@ namespace AirportServer.Repositories
                 latestLog.Out = DateTime.Now;
                 await _data.SaveChangesAsync();
             }
+
+            return latestLog!;
         }
+
 
         public async Task<bool> IsAirportFullAsync()
         {

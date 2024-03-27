@@ -20,14 +20,16 @@ namespace AirportServer.Data
         {
             try
             {
-                var leg1 = new Leg { Number = 1, CrossingTime = 3000 };
+                var leg1 = new Leg { Number = 1, CrossingTime = 3000/*, Status = LegStatusType.Arrival*/ };
                 var leg2 = new Leg { Number = 2, CrossingTime = 2000 };
                 var leg3 = new Leg { Number = 3, CrossingTime = 3000 };
-                var leg4 = new Leg { Number = 4, CrossingTime = 2000 };
+                var leg4 = new Leg { Number = 4, CrossingTime = 2000
+                   /* , Status = LegStatusType.Arrival | LegStatusType.Departure | LegStatusType.Exit*/ };
                 var leg5 = new Leg { Number = 5, CrossingTime = 2500 };
                 var leg6 = new Leg { Number = 6, CrossingTime = 1500 };
                 var leg7 = new Leg { Number = 7, CrossingTime = 1000 };
-                var leg8 = new Leg { Number = 8, CrossingTime = 2000 };
+                var leg8 = new Leg { Number = 8, CrossingTime = 2000
+                    /*, Status = LegStatusType.Departure*/ };
                 var leg9 = new Leg { Number = 9 };
 
                 var FromLeg1 = new LegsJoinTable { ToLeg = leg2, FromLeg = leg1};

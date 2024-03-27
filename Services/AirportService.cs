@@ -4,29 +4,33 @@ using Microsoft.EntityFrameworkCore;
 using AirportServer.Repositories;
 using AirportServer.Hubs;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AirportServer.Services
 {
-    public class DataService
+    public class AirportService
     {
         private readonly IAirportRepository _airportRepository;
         private List<Leg> LegsList { get; set; } = [];
         private List<LegsJoinTable> LegsJoinList { get; set; } = [];
 
         private readonly IHubContext<AirportHub> _hubContext;
+        private async Task SaveAsync() => await _airportRepository.SaveAsync();
 
-        public DataService(IAirportRepository airportRepository, IHubContext<AirportHub> hubContext)
+        public AirportService(IAirportRepository airportRepository, IHubContext<AirportHub> hubContext)
         {
             _airportRepository = airportRepository;
             _hubContext = hubContext;
-            InitializeAsync().Wait(); 
+            InitializeAsync().Wait();
         }
-        public async Task InitializeAsync()
+
+        private async Task InitializeAsync()
         {
             LegsList = await _airportRepository.GetAllLegsAsync();
             LegsJoinList = await _airportRepository.GetAllLegsJoinAsync();
         }
-        public async void AddNewFlight(Flight flight)
+
+        public async Task AddNewFlight(Flight flight)
         {
             Leg leg1 = LegsList.Find(l => l.Number == 1)!;
 
@@ -37,9 +41,9 @@ namespace AirportServer.Services
                 await AddLogAsync(flight);
                 await _airportRepository.SaveAsync();
                 flight.CallbackCalled += NextLeg;
-                PrintToConsole(flight);
             }
         }
+
         private async void NextLeg(Flight flight)
         {
             flight.CallbackCalled -= NextLeg;
@@ -58,8 +62,6 @@ namespace AirportServer.Services
                     {
                         ChangeStatusToDeparture(flight);
                         await MoveLeg(flight, nextLeg);
-                        await SaveAsync();
-                        flight.CallbackCalled += NextLeg;
                         break;
                     }
                     else
@@ -87,13 +89,12 @@ namespace AirportServer.Services
             if (!await IsLegOccupiedAsync(nextLeg5))
             {
                 await MoveLeg(flight, nextLeg5);
-                await SaveAsync();
             }
             else
             {
-                await WaitAsync(5);
+                await WaitAsync(2);
+                await BeforeDestinationArrival(flight, nextLegs);
             }
-            flight.CallbackCalled += NextLeg;
         }
 
         private async Task ArrivingDestination(Flight flight, List<LegsJoinTable> nextLegs)
@@ -102,7 +103,6 @@ namespace AirportServer.Services
             flight.Status = StatusType.DoneDepartured;
             await MoveLeg(flight, nextLeg9);
             await SaveAsync();
-            Console.WriteLine("Finished reached 9 watch the logs~!");
         }
         private async Task<bool> IsLegOccupiedAsync(Leg leg)
         {
@@ -133,21 +133,20 @@ namespace AirportServer.Services
 
         private async Task MoveLeg(Flight flight, Leg leg)
         {
-            await _airportRepository.UpdateOutLogTime(flight.Id);
+            Log log = await _airportRepository.UpdateOutLogTime(flight.Id);
+            await _hubContext.Clients.All.SendAsync("UpdateLogs", log);
             flight.Leg = leg;
             await AddLogAsync(flight);
-            PrintToConsole(flight);
+            await SaveAsync();
+            flight.CallbackCalled += NextLeg;
         }
 
-        private static void PrintToConsole(Flight flight) => Console.WriteLine($"\n\n\n--Flight Code: {flight.Code}--" +
-            $"\n --Current Leg = {flight.Leg!.Number}\n --Gonna wait = {flight.Leg.CrossingTime * 3 / 1000} SEC \n CurrentTime {DateTime.Now}\n\n\n");
         public async Task AddLogAsync(Flight flight)
         {
             Log log = new Log { Flight = flight, Leg = flight.Leg, In = DateTime.Now };
             await _airportRepository.AddLogAsync(log);
             await _hubContext.Clients.All.SendAsync("UpdateLogs", log);
-
         }
-        private async Task SaveAsync() => await _airportRepository.SaveAsync();
+
     }
 }

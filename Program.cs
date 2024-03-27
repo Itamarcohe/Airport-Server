@@ -29,7 +29,7 @@ builder.Services.AddCors(opt =>
 
 
 
-builder.Services.AddScoped<DataService>();
+builder.Services.AddScoped<AirportService>();
 builder.Services.AddScoped<IAirportRepository, AirportRepository>();
 
 var app = builder.Build();
@@ -51,7 +51,6 @@ app.MapHub<AirportHub>("/airport");
 app.UseCors("reactApp");
 
 app.Run();
-
 
 
 

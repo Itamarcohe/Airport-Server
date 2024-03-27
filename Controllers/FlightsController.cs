@@ -1,5 +1,6 @@
 ﻿using AirportServer.Data;
 using AirportServer.Models;
+using AirportServer.Repositories;
 using AirportServer.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,32 +11,17 @@ namespace AirportServer.Controllers
     [ApiController]
     public class FlightsController : ControllerBase
     {
-        private readonly DataContext data;
-        private readonly DataService service;
+        private readonly AirportService _service;
 
-        public FlightsController(DataContext data, DataService service)
+        public FlightsController(AirportService service)
         {
-            this.data = data;
-            this.service = service;
-
-            //Delete the existing database if it exists
-            //data.Database.EnsureDeleted();
-
-            //Create a new database
-            //data.Database.EnsureCreated();
-
+            _service = service;
         }
 
-        //[HttpGet]
-        //public void SeedData()
-        //{
-        //    data.SeedData();
-        //}
-
         [HttpPost]
-        public void AddFlight(Flight flight)
+        public async Task AddFlight(Flight flight)
         {
-            service.AddNewFlight(flight);
+            await _service.AddNewFlight(flight);
         }
 
     }

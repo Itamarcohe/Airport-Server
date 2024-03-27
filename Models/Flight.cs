@@ -3,16 +3,13 @@
     public class Flight
     {
 
-        public Flight()
-        {
-            LegTimer = new Timer(MyCallback);
-        }
+        public Flight() => LegTimer = new Timer(MyCallback);
 
         public int Id { get; set; }
-        public string Code { get; set; }
+        public string Code { get; set; } = "SomeFlight";
         public StatusType Status { get; set; }
         private Leg? leg { get; set; }
-        public virtual Leg Leg
+        public virtual Leg? Leg
         {
             get => leg; set
             {
@@ -21,11 +18,9 @@
                 if (leg != null)
                 {
                     LegTimer.Change(0, leg.CrossingTime * 3);
-                    StatusChanged?.Invoke(this);
                 }
             }
         }
-
 
         public Timer LegTimer;
 
@@ -35,7 +30,6 @@
         }
 
         public event Action<Flight> CallbackCalled;
-        public event Action<Flight> StatusChanged;
 
 
     }
