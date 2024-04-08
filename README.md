@@ -20,3 +20,5 @@ The simulator is a separate console application that generates random flight obj
    ```bash
    git clone https://github.com/Itamarcohe/Airport-Server.git
 ``
+
+2. **Install dependencies for the server-side (ASP.NET Core Web API): cd server dotnet restore
